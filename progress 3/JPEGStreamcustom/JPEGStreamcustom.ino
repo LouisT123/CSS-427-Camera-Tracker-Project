@@ -1,8 +1,5 @@
-
-
 /*
 JPEGStream.ino : capture images and stream them to host as JPEG files
-
 */
 
 #include <Wire.h>
@@ -17,7 +14,7 @@ JPEGStream.ino : capture images and stream them to host as JPEG files
 #include <Stepper.h>
 #include <AccelStepper.h>
 #include <MultiStepper.h>
-const int stepsPerRevolution = 512;  // change this to fit the number of steps per revolution
+const int stepsPerRevolution = 1024;  // change this to fit the number of steps per revolution
 // for your motor
 
 //uncomment for camera
@@ -37,6 +34,9 @@ int brightness  = 0;
  //set up motor
  // initialize the stepper library on pins 8 through 11:
  Stepper myStepper(stepsPerRevolution, 8, 10, 9, 11);
+ int startLocation = 1;
+ int CW = 0;
+ int CCW = 0;
 
 
 void setup(void) 
@@ -63,9 +63,9 @@ void setup(void)
     pinMode(photocell, INPUT);
 
    //set start position
-  
+   
     //set up motor speed in rpm (75)
-    myStepper.setSpeed(60);
+    myStepper.setSpeed(20);
 }
 void compass()
 {
@@ -88,17 +88,25 @@ void compass()
   delay(500);
 }
 
-void motor()
+void motorCW()
 {
-  // step one revolution  in one direction:
-  Serial.println("clockwise");
-  myStepper.step(stepsPerRevolution);
-  delay(500);
+    // step one revolution  in one direction:
+    Serial.println("clockwise");
+    CW = (stepsPerRevolution);
+    myStepper.step(CW);
+    delay(500);
+    Serial.println("at location A");
 
-  // step one revolution in the other direction:
-  Serial.println("counterclockwise");
-  myStepper.step(-stepsPerRevolution);
-  delay(500);
+}
+
+void motorCCW()
+{
+  // step one revolution  in the other direction:
+    Serial.println("counterclockwise");
+    CCW = (-stepsPerRevolution);
+    myStepper.step(CCW);
+    delay(500);
+    Serial.println("at location B");
 }
 
 void loop() 
@@ -108,7 +116,7 @@ void loop()
 
     brightness = analogRead(photocell);
 
-    if (brightness > 750)
+    if (brightness > 150)
     {
       Serial.println("bright enough, on");
       compass();
@@ -118,7 +126,8 @@ void loop()
       Serial.println("too dark, off");
     }
 
-    motor();
+    motorCW();
+    motorCCW();
     
  
   
