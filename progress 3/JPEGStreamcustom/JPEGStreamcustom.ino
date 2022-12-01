@@ -14,7 +14,7 @@ JPEGStream.ino : capture images and stream them to host as JPEG files
 #include <Stepper.h>
 #include <AccelStepper.h>
 #include <MultiStepper.h>
-const int stepsPerRevolution = 1024;  // change this to fit the number of steps per revolution
+const int stepsPerRevolution = 512;  // change this to fit the number of steps per revolution
 // for your motor
 
 //uncomment for camera
@@ -65,7 +65,7 @@ void setup(void)
    //set start position
    
     //set up motor speed in rpm (75)
-    myStepper.setSpeed(20);
+    myStepper.setSpeed(10);
 
     
     //User on demand data
@@ -147,8 +147,19 @@ void loop()
     }
  
     motorCW();
+
+    if (brightness > 150)
+    {
+      Serial.println("bright enough, on");
+      compass();
+    }
+    else
+    {
+      Serial.println("too dark, off");
+    }
+    
     motorCCW();
-    delay(1000);
+ 
     
  
   
