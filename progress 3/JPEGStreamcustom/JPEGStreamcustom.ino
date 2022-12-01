@@ -66,6 +66,10 @@ void setup(void)
    
     //set up motor speed in rpm (75)
     myStepper.setSpeed(20);
+
+    
+    //User on demand data
+    Serial.println("Press 1 for ondemand compass data, 2 for on demand brightness");
 }
 void compass()
 {
@@ -111,10 +115,26 @@ void motorCCW()
 
 void loop() 
 {
+    int userIn = Serial.parseInt();
+
+    if (userIn == 1)
+    {
+      Serial.print("Compass data requested, heading is: ");
+      compass();
+    }
+
+  
     //camera capture
     //myCam.capture();
-
+    
+    //read brightness
     brightness = analogRead(photocell);
+
+    if (userIn == 2)
+    {
+      Serial.print("Photocell data requested, brightness is: ");
+      Serial.println(brightness);
+    }
 
     if (brightness > 150)
     {
@@ -125,9 +145,10 @@ void loop()
     {
       Serial.println("too dark, off");
     }
-
+ 
     motorCW();
     motorCCW();
+    delay(1000);
     
  
   
