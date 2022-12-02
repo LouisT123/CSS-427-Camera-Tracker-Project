@@ -9,7 +9,7 @@
 
 //stepper motor
 #include <Stepper.h>
-const int stepsPerRevolution = 512;  // change this to fit the number of steps per revolution
+const int stepsPerRevolution = 390;  // change this to fit the number of steps per revolution
 // for your motor
 
 //compass setup
@@ -48,7 +48,7 @@ void setup() {
   pinMode(photocell, INPUT);
 
   //set up motor speed
-  myStepper.setSpeed(10);
+  myStepper.setSpeed(20);
 
   //User on demand data
   Serial.println("Press 1 for on demand compass data, 2 for on demand photocell brightness data");
@@ -130,7 +130,16 @@ void loop() {
     }
     compass();
     motorCW();
+    //halfway
     compass();
+    delay(100);
+    //rotate to 
+    motorCW();
+    compass();
+    
+    motorCCW();
+    compass();
+    delay(100);
     motorCCW();
     compass();
     
