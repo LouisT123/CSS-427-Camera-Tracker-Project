@@ -29,20 +29,20 @@ int brightness  = 0;
 
 static const int CS = 7;
 //communication test
-SoftwareSerial s(2,3);
+//SoftwareSerial s(2,3);
 Serial_ArduCAM_FrameGrabber fg;
 byte buf[2];
 /* Choose your camera */
-ArduCAM_Mini_2MP myCam(CS, &fg);
+//ArduCAM_Mini_2MP myCam(CS, &fg);
 
 void setup() {
   Wire.setClock(400000);
-  Wire.begin();
+  //Wire.begin();
   TWBR = 12;
-  SPI.begin();
+  //SPI.begin();
   Serial.begin(921600);
   //s.begin(9600);
-  myCam.beginJpeg160x120();
+  //myCam.beginJpeg160x120();
 
   //set up photocell sensor
   pinMode(photocell, INPUT);
@@ -97,13 +97,13 @@ void motorCCW()
     Serial.println("at location B");
 }
 
-
 void loop() {
 
-  if (s.available() > 0)
-  {
+  //if (s.available() > 0)
+  //{
     int userIn = Serial.parseInt();
 
+    //read compass data
     if (userIn == 1)
     {
       Serial.print("Compass data requested, heading is: ");
@@ -122,15 +122,19 @@ void loop() {
     if (brightness > 150)
     {
       Serial.println("bright enough, camera on");
-      myCam.capture();
+      //myCam.capture();
     }
     else
     {
       Serial.println("too dark, camera off");
     }
+    compass();
     motorCW();
+    compass();
     motorCCW();
+    compass();
+    
  
-  }
+  //}
 
 }
