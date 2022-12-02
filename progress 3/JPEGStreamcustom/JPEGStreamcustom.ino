@@ -1,10 +1,7 @@
-/*
-JPEGStream.ino : capture images and stream them to host as JPEG files
-*/
-
+#include <SoftwareSerial.h>
 #include <Wire.h>
-//#include <BreezyArduCAM.h>
-//#include <SPI.h>
+#include <BreezyArduCAM.h>
+#include <SPI.h>
 
 //compass
 #include <Adafruit_LSM303DLH_Mag.h>
@@ -12,17 +9,8 @@ JPEGStream.ino : capture images and stream them to host as JPEG files
 
 //stepper motor
 #include <Stepper.h>
-#include <AccelStepper.h>
-#include <MultiStepper.h>
 const int stepsPerRevolution = 512;  // change this to fit the number of steps per revolution
 // for your motor
-
-//uncomment for camera
-//static const int CS = 7;
-//Serial_ArduCAM_FrameGrabber fg;
-/* Choose your camera */
-//ArduCAM_Mini_2MP myCam(CS, &fg);
-
 
 //compass setup
 Adafruit_LSM303DLH_Mag_Unified mag = Adafruit_LSM303DLH_Mag_Unified(12345);
@@ -39,38 +27,34 @@ int brightness  = 0;
  int CCW = 0;
 
 
-void setup(void) 
-{
-    // ArduCAM Mini uses both I^2C and SPI buses
-    //Wire.begin();
-    //SPI.begin();
+static const int CS = 7;
+//communication test
+SoftwareSerial s(2,3);
+Serial_ArduCAM_FrameGrabber fg;
+byte buf[2];
+/* Choose your camera */
+ArduCAM_Mini_2MP myCam(CS, &fg);
 
-    // Fastest baud rate (change to 115200 for Due)
-    Serial.begin(921600);
-    //Serial.begin(115200);
+void setup() {
+  Wire.setClock(400000);
+  Wire.begin();
+  TWBR = 12;
+  SPI.begin();
+  Serial.begin(921600);
+  //s.begin(9600);
+  myCam.beginJpeg160x120();
 
-    // Start the camera in JPEG mode with a specific image size
-    //myCam.beginJpeg320x240();
+  //set up photocell sensor
+  pinMode(photocell, INPUT);
 
-    /* Initialise the compass sensor */
-    if (!mag.begin()) {
-    /* There was a problem detecting the LSM303 ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while (1)
-      ;
-    }
-    //set up photocell
-    pinMode(photocell, INPUT);
+  //set up motor speed
+  myStepper.setSpeed(10);
 
-   //set start position
-   
-    //set up motor speed in rpm (75)
-    myStepper.setSpeed(10);
-
-    
-    //User on demand data
-    Serial.println("Press 1 for ondemand compass data, 2 for on demand brightness");
+  //User on demand data
+  Serial.println("Press 1 for on demand compass data, 2 for on demand photocell brightness data");
+  
 }
+
 void compass()
 {
    //compass functions  sent to serial terminal for user
@@ -89,7 +73,7 @@ void compass()
   }
   Serial.print("Compass Heading: ");
   Serial.println(heading);
-  delay(500);
+  delay(200);
 }
 
 void motorCW()
@@ -98,7 +82,7 @@ void motorCW()
     Serial.println("clockwise");
     CW = (stepsPerRevolution);
     myStepper.step(CW);
-    delay(500);
+    delay(200);
     Serial.println("at location A");
 
 }
@@ -109,12 +93,15 @@ void motorCCW()
     Serial.println("counterclockwise");
     CCW = (-stepsPerRevolution);
     myStepper.step(CCW);
-    delay(500);
+    delay(200);
     Serial.println("at location B");
 }
 
-void loop() 
-{
+
+void loop() {
+
+  if (s.available() > 0)
+  {
     int userIn = Serial.parseInt();
 
     if (userIn == 1)
@@ -122,11 +109,6 @@ void loop()
       Serial.print("Compass data requested, heading is: ");
       compass();
     }
-
-  
-    //camera capture
-    //myCam.capture();
-    
     //read brightness
     brightness = analogRead(photocell);
 
@@ -136,31 +118,19 @@ void loop()
       Serial.println(brightness);
     }
 
+    //if bright enough, run camera
     if (brightness > 150)
     {
-      Serial.println("bright enough, on");
-      compass();
+      Serial.println("bright enough, camera on");
+      myCam.capture();
     }
     else
     {
-      Serial.println("too dark, off");
+      Serial.println("too dark, camera off");
     }
- 
     motorCW();
-
-    if (brightness > 150)
-    {
-      Serial.println("bright enough, on");
-      compass();
-    }
-    else
-    {
-      Serial.println("too dark, off");
-    }
-    
     motorCCW();
  
-    
- 
-  
+  }
+
 }
