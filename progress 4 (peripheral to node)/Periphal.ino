@@ -21,7 +21,7 @@ int brightness  = 0;
 
  //set up motor
  // initialize the stepper library on pins 8 through 11:
- Stepper myStepper(stepsPerRevolution, 8, 10, 9, 11);
+ Stepper myStepper(stepsPerRevolution, 8, 10,9, 11);
  int startLocation = 1;
  int CW = 0;
  int CCW = 0;
@@ -29,9 +29,8 @@ int brightness  = 0;
 
 static const int CS = 7;
 //communication test
-//SoftwareSerial s(2,3);
+SoftwareSerial s(6,7);
 Serial_ArduCAM_FrameGrabber fg;
-byte buf[2];
 /* Choose your camera */
 //ArduCAM_Mini_2MP myCam(CS, &fg);
 
@@ -40,6 +39,7 @@ void setup() {
   //Wire.begin();
   TWBR = 12;
   //SPI.begin();
+  s.begin(9600);
   Serial.begin(921600);
   //s.begin(9600);
   //myCam.beginJpeg160x120();
@@ -52,10 +52,10 @@ void setup() {
 
   //User on demand data
   Serial.println("Press 1 for on demand compass data, 2 for on demand photocell brightness data");
-  
+  while(!mag.begin());
 }
 
-void compass()
+float compass()
 {
    //compass functions  sent to serial terminal for user
   /* Get a new sensor event */
@@ -65,7 +65,7 @@ void compass()
   float Pi = 3.14159;
 
   // Calculate the angle of the vector y,x
-  float heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / Pi;
+  float heading = (atan2(event.magnetic.y, event.magnetic.z) * 180) / Pi;
 
   // Normalize to 0-360
   if (heading < 0) {
@@ -73,7 +73,8 @@ void compass()
   }
   Serial.print("Compass Heading: ");
   Serial.println(heading);
-  delay(200);
+  //delay(200);
+  return(heading);
 }
 
 void motorCW()
@@ -97,12 +98,31 @@ void motorCCW()
     Serial.println("at location B");
 }
 
+bool getPhotoCell(){
+  
+  brightness = analogRead(photocell);
+
+
+  //if bright enough, run camera
+  if (brightness > 150)
+  {
+    Serial.println("bright enough, camera on");
+    return true;
+    //myCam.capture();
+  }
+  else
+  {
+    Serial.println("too dark, camera off");
+    return false;    
+  }
+}
+
 void loop() {
 
   //if (s.available() > 0)
   //{
     int userIn = Serial.parseInt();
-
+  /*
     //read compass data
     if (userIn == 1)
     {
@@ -110,48 +130,48 @@ void loop() {
       compass();
     }
     //read brightness
-    brightness = analogRead(photocell);
-
+      
     if (userIn == 2)
     {
       Serial.print("Photocell data requested, brightness is: ");
       Serial.println(brightness);
     }
-
-    //if bright enough, run camera
-    if (brightness > 150)
-    {
-      Serial.println("bright enough, camera on");
-      //myCam.capture();
-    }
-    else
-    {
-      Serial.println("too dark, camera off");
-    }
-    compass();
-
+    */
     
+s.print(encode(getPhotoCell(), compass()));
     motorCW();
     //halfway
-    compass();
-
-    
+s.print(encode(getPhotoCell(), compass()));
     delay(100);
     //rotate to 
-
-    
     motorCW();
-
-    
-    compass();
+s.print(encode(getPhotoCell(), compass()));
     
     motorCCW();
-    compass();
+s.print(encode(getPhotoCell(), compass()));
     delay(100);
     motorCCW();
-    compass();
+s.print(encode(getPhotoCell(), compass()));
     
- 
   //}
+  //s.print(encode(getPhotoCell(), compass()));
+
+}
+
+String encode(bool b, float i)
+{
+  String return_value = "";
+  if(b == true)
+  {
+    return_value += '1'; 
+  }
+  else{
+    return_value += '0';
+  }
+  String temp = String(i,3);
+  return_value += temp;
+  return_value += '\n';
+  Serial.println(return_value);
+  return return_value;
 
 }
