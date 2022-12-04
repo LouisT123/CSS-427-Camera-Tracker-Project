@@ -27,7 +27,7 @@ int brightness  = 0;
  int CCW = 0;
 
 
-static const int CS = 7;
+static const int CS = 3;
 //communication test
 SoftwareSerial s(6,7);
 Serial_ArduCAM_FrameGrabber fg;
