@@ -19,12 +19,12 @@ Adafruit_LSM303DLH_Mag_Unified mag = Adafruit_LSM303DLH_Mag_Unified(12345);
 const int photocell =  A0;
 int brightness  = 0;
 
- //set up motor
- // initialize the stepper library on pins 8 through 11:
- Stepper myStepper(stepsPerRevolution, 8, 10,9, 11);
- int startLocation = 1;
- int CW = 0;
- int CCW = 0;
+//set up motor
+// initialize the stepper library on pins 8 through 11:
+Stepper myStepper(stepsPerRevolution, 8, 10,9, 11);
+int startLocation = 1;
+int CW = 0;
+int CCW = 0;
 
 
 static const int CS = 5;
@@ -35,13 +35,13 @@ Serial_ArduCAM_FrameGrabber fg;
 ArduCAM_Mini_2MP myCam(CS, &fg);
 
 void setup() {
-  Wire.setClock(400000);
+  //Wire.setClock(400000);
   Wire.begin();
   //TWBR = 12;
   SPI.begin();
   //s.begin(9600);
   Serial.begin(921600);
-  //s.begin(9600);
+  s.begin(9600);
   myCam.beginJpeg160x120();
 
   //set up photocell sensor
@@ -73,7 +73,7 @@ float compass()
   }
   Serial.print("Compass Heading: ");
   Serial.println(heading);
-  //delay(200);
+  //delay(500);
   return(heading);
 }
 
@@ -106,9 +106,9 @@ bool getPhotoCell(){
   //if bright enough, run camera
   if (brightness > 150)
   {
-    Serial.println("bright enough, camera on");
+    Serial.println("bright enough, camera paused");
     return true;
-    myCam.capture();
+    //myCam.capture(); doesnt work in loop here
   }
   else
   {
@@ -121,7 +121,7 @@ void loop() {
 
   //if (s.available() > 0)
   //{
-    int userIn = Serial.parseInt();
+   // int userIn = Serial.parseInt();
   /*
     //read compass data
     if (userIn == 1)
@@ -137,8 +137,17 @@ void loop() {
       Serial.println(brightness);
     }
     */
-myCam.capture();
-//s.print(encode(getPhotoCell(), compass()));
+//myCam.capture();
+ brightness = analogRead(photocell);
+ //pause camera capturing if its too dark
+ if (brightness > 150)
+ {
+  myCam.capture();
+ }
+s.print(encode(getPhotoCell(), compass()));
+//getPhotoCell();
+//compass();
+
     //motorCW();
     //halfway
 //s.print(encode(getPhotoCell(), compass()));

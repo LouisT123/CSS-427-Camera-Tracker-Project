@@ -22,7 +22,7 @@ along with BreezyArduCAM.  If not, see <http://www.gnu.org/licenses/>.
 #define BreezyArduCAM_H
 
 #include <Arduino.h>
-
+#include<SoftwareSerial.h>
 #if defined (__AVR__)
 #define regtype volatile uint8_t
 #define regsize uint8_t
@@ -104,7 +104,7 @@ class ArduCAM_Mini {
     private:
 
         ArduCAM_FrameGrabber * grabber;
-
+        SoftwareSerial* ss = new SoftwareSerial(2,3);
         void grabJpegFrame(uint32_t length);
         void grabQvgaFrame(uint32_t length);
 };
@@ -291,7 +291,10 @@ class Serial_ArduCAM_FrameGrabber : public ArduCAM_FrameGrabber {
          */
         virtual bool gotStartRequest(void) override 
         {
+            //uint8_t temp = Serial.read();
+            //return (Serial.available() && temp);
             return (Serial.available() && Serial.read());
+            //return(ss->available() && ss->read() > 0);
         }
 
         /**
@@ -299,6 +302,8 @@ class Serial_ArduCAM_FrameGrabber : public ArduCAM_FrameGrabber {
          */
         virtual bool gotStopRequest(void) override 
         {
+            //uint8_t temp = !Serial.read();
+            //return (Serial.available() && temp);
             return (Serial.available() && !Serial.read());
         }
 
@@ -308,7 +313,7 @@ class Serial_ArduCAM_FrameGrabber : public ArduCAM_FrameGrabber {
      */
     virtual void sendByte(uint8_t b) override 
     {
-        Serial.write(b);
+        Serial.println(b);
     }
 };
 

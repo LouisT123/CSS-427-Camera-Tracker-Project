@@ -105,23 +105,61 @@ ArduCAM_Mini::ArduCAM_Mini(uint8_t addr, uint32_t mfs, uint8_t cs, class ArduCAM
 
     sensor_addr = addr;
     max_fifo_size = mfs;
-
+    ss->begin(57600);
+    pinMode(2,INPUT);
+    pinMode(3,OUTPUT);
     grabber = fg;
 }
 
 void ArduCAM_Mini::capture(void)
 {
 
+    byte buffer[2];
+   /*
+    if(ss->available() && (int)ss->read() == 1)
+    {
+        Serial.print(1);
+        //capturing = true;
+        //starting = true;
+    }
+    */
     // Wait for start bit from host
-    if (grabber->gotStartRequest()) {
-        capturing = true;
-        starting = true;
+    Wire.requestFrom(8,2);
+    int count = 0;
+    while(Wire.available() > 0)
+    {
+        buffer[count] = Wire.read();
+        ++count;
+    }
+    
+    //if (grabber->gotStartRequest()) {
+    if(!starting)
+    {
+        if(buffer[0] == 1 && buffer[1] == 1)
+        {
+            Serial.print("start");
+            capturing = true;
+            starting = true;
+        }
+        /*
+        if((ss->available() && (int)ss->read() == 1) || (grabber->gotStartRequest())){
+            
+            capturing = true;
+            starting = true;
+        }
+        */
     }
 
+    
     if (capturing) {
 
+        //ss->write(ss->read());  
         // Check for halt bit from host
-        if (grabber->gotStopRequest()) {
+        //if (grabber->gotStopRequest()) {
+        //if(ss->available() && ss->read() == 0){
+        if(buffer[0] == 1 && buffer[1] == 0)
+        {
+            Serial.print("stop");
             starting = false;
             capturing = false;
             return;
@@ -356,16 +394,26 @@ void ArduCAM_Mini::grabJpegFrame(uint32_t length)
         temp_last = temp;
         temp =  SPI.transfer(0x00);
         if (is_header) {
-            grabber->sendByte(temp);
+            Wire.beginTransmission(8);
+            Wire.write(temp);
+            Wire.endTransmission();
+            //ss->write(temp);
+            //grabber->sendByte(temp);
         }
-        else if ((temp == 0xD8) & (temp_last == 0xFF)) {
+        else if ((temp == 0xD8) && (temp_last == 0xFF)) {
             is_header = true;
-            grabber->sendByte(temp_last);
-            grabber->sendByte(temp);
+            Wire.beginTransmission(8);
+            Wire.write(temp_last);
+            Wire.write(temp);
+            Wire.endTransmission();
+            //ss->write(temp_last);
+            //ss->write(temp);
+            //grabber->sendByte(temp_last);
+            //grabber->sendByte(temp);
         }
         if ((temp == 0xD9) && (temp_last == 0xFF)) 
             break;
-        delayMicroseconds(15);
+        delayMicroseconds(5);
     }
 
     // supports continuous capture
