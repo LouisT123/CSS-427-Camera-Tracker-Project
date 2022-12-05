@@ -35,7 +35,7 @@ Serial_ArduCAM_FrameGrabber fg;
 ArduCAM_Mini_2MP myCam(CS, &fg);
 
 void setup() {
-  //Wire.setClock(400000);
+  Wire.setClock(400000);
   Wire.begin();
   //TWBR = 12;
   SPI.begin();
@@ -106,13 +106,13 @@ bool getPhotoCell(){
   //if bright enough, run camera
   if (brightness > 150)
   {
-    Serial.println("bright enough, camera paused");
+    Serial.println("bright enough, camera on");
     return true;
     //myCam.capture(); doesnt work in loop here
   }
   else
   {
-    Serial.println("too dark, camera off");
+    Serial.println("too dark, camera paused");
     return false;    
   }
 }
@@ -142,9 +142,15 @@ void loop() {
  //pause camera capturing if its too dark
  if (brightness > 150)
  {
+  
   myCam.capture();
+  
  }
 s.print(encode(getPhotoCell(), compass()));
+Wire.beginTransmission(1);
+Wire.write("test");
+Wire.endTransmission();
+
 //getPhotoCell();
 //compass();
 

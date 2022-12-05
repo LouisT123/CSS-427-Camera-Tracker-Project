@@ -9,6 +9,8 @@ const int TXpin = D4;
 #include <SoftwareSerial.h>
 SoftwareSerial s(RXpin,TXpin);
 uint8_t broadcastAddress[] = {0x50,0x02,0x91,0xDC,0xE7,0x3E};
+//I2C
+#include <Wire.h>
 
 bool photocellStatus = false;
 float compassData;
@@ -38,6 +40,13 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 2000;  // send readings timer
 
 void setup() {
+  //I2C attempt
+  Wire.begin(1);
+  Wire.onReceive(cameraReader);
+  //Wire.onRequest(cameraRequest);
+  
+
+  
   Serial.begin(115200);
   s.begin(9600);
   pinMode(RXpin, INPUT);
@@ -73,6 +82,8 @@ void loop() {
 
     lastTime = millis();
   }
+
+
   String data;
   while(s.available())
   {
@@ -96,15 +107,38 @@ void loop() {
     Serial.println("pc");
     Serial.println(photocellStatus);
     Serial.println("cp");
-    Serial.println(compassData);    
+    Serial.println(compassData); 
   }
 
 }
 
+//I2C attempt camera
+void cameraReader(int j)
+{
+  while (Wire.available())
+  {
+     Serial.println("recieving from camera, hopefully");
+  }
+ 
+}
+/*void cameraRequest()
+{
+  Wire.write(1);
+} */
+
+void OnDataRecvCamera(uint8_t * mac, uint8_t *incomingData, uint8_t len)
+{
+  memcpy(&receive, incomingData, sizeof(receive));
+  Serial.println(receive.str);
+  delay(100);
+  s.print(receive.str + '\n');
+}
+//end of I2C test 
+
 void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
   //Serial.print("Last Packet Send Status: ");
   if (sendStatus == 0){
-    Serial.println("Delivery success");
+    //Serial.println("Delivery success");
   }
   else{
     Serial.println("Delivery fail");
