@@ -12,7 +12,7 @@
 const int stepsPerRevolution = 390;  // change this to fit the number of steps per revolution
 // for your motor
 
-//compass setup
+//compass setup   
 Adafruit_LSM303DLH_Mag_Unified mag = Adafruit_LSM303DLH_Mag_Unified(12345);
 
 //photocell setup
@@ -27,22 +27,22 @@ int brightness  = 0;
  int CCW = 0;
 
 
-static const int CS = 7;
+static const int CS = 5;
 //communication test
 SoftwareSerial s(6,7);
 Serial_ArduCAM_FrameGrabber fg;
 /* Choose your camera */
-//ArduCAM_Mini_2MP myCam(CS, &fg);
+ArduCAM_Mini_2MP myCam(CS, &fg);
 
 void setup() {
   Wire.setClock(400000);
-  //Wire.begin();
-  TWBR = 12;
-  //SPI.begin();
-  s.begin(9600);
+  Wire.begin();
+  //TWBR = 12;
+  SPI.begin();
+  //s.begin(9600);
   Serial.begin(921600);
   //s.begin(9600);
-  //myCam.beginJpeg160x120();
+  myCam.beginJpeg160x120();
 
   //set up photocell sensor
   pinMode(photocell, INPUT);
@@ -108,7 +108,7 @@ bool getPhotoCell(){
   {
     Serial.println("bright enough, camera on");
     return true;
-    //myCam.capture();
+    myCam.capture();
   }
   else
   {
@@ -137,21 +137,21 @@ void loop() {
       Serial.println(brightness);
     }
     */
-  
-s.print(encode(getPhotoCell(), compass()));
-    motorCW();
+myCam.capture();
+//s.print(encode(getPhotoCell(), compass()));
+    //motorCW();
     //halfway
-s.print(encode(getPhotoCell(), compass()));
-    delay(100);
+//s.print(encode(getPhotoCell(), compass()));
+    //delay(100);
     //rotate to 
-    motorCW();
-s.print(encode(getPhotoCell(), compass()));
+    //motorCW();
+//s.print(encode(getPhotoCell(), compass()));
     
-    motorCCW();
-s.print(encode(getPhotoCell(), compass()));
-    delay(100);
-    motorCCW();
-s.print(encode(getPhotoCell(), compass()));
+    //motorCCW();
+//s.print(encode(getPhotoCell(), compass()));
+    //delay(100);
+    //motorCCW();
+//s.print(encode(getPhotoCell(), compass()));
     
   //}
   //s.print(encode(getPhotoCell(), compass()));
