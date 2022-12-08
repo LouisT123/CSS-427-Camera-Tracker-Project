@@ -147,6 +147,8 @@ void loop() {
   
  }
 s.print(encode(getPhotoCell(), compass()));
+
+//I2C testing 
 Wire.beginTransmission(1);
 Wire.write("test");
 Wire.endTransmission();

@@ -1,13 +1,19 @@
-
-
 //install library from https://www.arduino.cc/reference/en/libraries/liquidcrystal/
 // include the library code:
 #include <LiquidCrystal.h>
+
+//pins for buttons
+const char pinA = A1;
+const char pinB = A0;
+
+char a_byte = 0;// defining a character data for a variable
+String a_str = "";// creating a string having space
 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
 
 //stepper motor
 #include <Stepper.h>
@@ -22,62 +28,64 @@ int CW = 0;
 int CCW = 0;
 
 void setup() {
+  Serial.begin(115200);
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.print("hello, world!");
-
+  //reset lcd:
+  lcd.clear();
    //set up motor speed
   myStepper.setSpeed(20);
+
+  pinMode(pinA, INPUT_PULLUP);
+  pinMode(pinB, INPUT_PULLUP);
 
 }
 
 void loop() {
-  
-// replace all helloWorldTest with serial read once data communication is done
-  helloWorldTest();
-  motorCW();
-  
-  delay(100);
-  helloWorldTest();
+  checkButton();
+  //motorCW();
 
-  motorCW();
-  delay(100);
-  helloWorldTest();
+  checkButton();
+  //motorCW();
 
-  motorCCW();
-  delay(100);
-  helloWorldTest();
+  checkButton();
+  //motorCCW();
 
-  motorCCW();
-  delay(100);
-  helloWorldTest();
+  checkButton();
+  //motorCCW();
 }
 
-void serialRead()
+void checkButton()
 {
-   // when characters arrive over the serial port...
-  if (Serial.available()) {
-    // wait a bit for the entire message to arrive
-    delay(100);
-    // clear the screen
-    lcd.clear();
-    // read all the available characters
-    while (Serial.available() > 0) {
-      // display each character to the LCD
-      lcd.write(Serial.read());
+    bool state = digitalRead(pinB); 
+    bool stateA = digitalRead(pinA); 
+    //if button state is pressed
+    if (state == false)
+    {
+      Serial.println("button B send compass:"); //print to serial (can prob delete later, just for testing)
+      //cannot trigger multiple times if holding button
+      while(digitalRead(pinB)== false)
+      {
+        //do nothing
+      }
+      lcd.print("compass: XXX.X"); //purely to test lcd, later on replace mesage with incoming data variable
+      delay(1000);
+      lcd.clear();
     }
-  }
+
+    if (stateA == false)
+    {
+      Serial.println("button A send photocell:");
+      while(digitalRead(pinA)== false)
+      {
+        //do nothing
+      }
+      lcd.print("photocell: XXX"); //purely to test lcd, later on replace mesage with incoming data variable
+      delay(1000);
+      lcd.clear();
+    }
 }
 
-void helloWorldTest()
-{
-  // set the cursor to column 0, line 1
-  // (note: line 1 is the second row, since counting begins with 0):
-   lcd.setCursor(0, 1);
-  // print the number of seconds since reset:
-  lcd.print(millis() / 1000);
-}
 
 void motorCW()
 {
@@ -85,7 +93,7 @@ void motorCW()
     Serial.println("clockwise");
     CW = (stepsPerRevolution);
     myStepper.step(CW);
-    delay(200);
+    delay(1000);
     Serial.println("at location A");
 
 }
@@ -96,6 +104,6 @@ void motorCCW()
     Serial.println("counterclockwise");
     CCW = (-stepsPerRevolution);
     myStepper.step(CCW);
-    delay(200);
+    delay(1000);
     Serial.println("at location B");
 }

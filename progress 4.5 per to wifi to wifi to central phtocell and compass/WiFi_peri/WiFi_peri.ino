@@ -115,7 +115,7 @@ void loop() {
 //I2C attempt camera
 void cameraReader(int j)
 {
-  while (Wire.available())
+  while (Wire.available() > 0)
   {
      Serial.println("recieving from camera, hopefully");
   }

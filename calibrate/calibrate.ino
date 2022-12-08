@@ -2,10 +2,10 @@
  
 #define BUADRATE 9600
  
-#define IN1 11 // IN1
-#define IN2 10 // IN2
-#define IN3 9 // IN3
-#define IN4 8 // IN4
+#define IN1 10 // IN1
+#define IN2 9 // IN2
+#define IN3 8 // IN3
+#define IN4 7 // IN4
 #define STEPS 2048 // 1봐퀴 스텝수
 #define RPM 10 // 10 이하로 설정을 권장 
  
